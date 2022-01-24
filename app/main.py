@@ -34,7 +34,6 @@ class InstaBot():
         self.driver.close()
         self.driver.quit()
 
-
     def selector_exist(self, selector: tuple) -> bool:
 
         try:
@@ -45,7 +44,6 @@ class InstaBot():
             exist = False
 
         return exist
-
 
     def auth(self):
 
@@ -75,16 +73,13 @@ class InstaBot():
             print(f'Вызвано исключение: {ex}')
             self.close_browser()
 
-
     def goto_profile(self, user: str):
 
         self.driver.get(f'https://www.instagram.com/{user}/')
 
-
     def goto_tag(self, tag: str):
 
         self.driver.get(f'https://www.instagram.com/explore/tags/{tag}/')
-
 
     def parce_posts_by_tag(self, tag: str):
 
@@ -116,7 +111,6 @@ class InstaBot():
         with open(f'files\\{tag}_links.txt', 'a') as text_file:
             for link in posts_url:
                 text_file.write(link + '\n')
-
 
     def parce_users_post_by_tag(self, tag: str):
 
@@ -155,7 +149,6 @@ class InstaBot():
         with open(f'files\\{tag}_users_url.txt', 'a') as text_file:
             for user in users_url:
                 text_file.write(user + '\n')
-
 
     def parse_follower_users(self, user_url: str):
 
@@ -222,12 +215,23 @@ class InstaBot():
             print(f'Вызвано исключение: {ex}')
             self.close_browser()
 
-
     def exit_profile(self):
         self.driver.find_element(*MyProfile.edit_btn).click()
         sleep(randrange(1, 3))
         self.driver.find_element(*MyProfile.exit_btn).click()
 
+    def delay_action(self, min: int):
+        if min == 40:
+            delay = randrange(40, 60)
+        elif min == 80:
+            delay = randrange(80, 120)
+
+        while delay:
+            print(f'\rЗадержка {delay} с.', end='')
+            sleep(1)
+            delay -= 1
+
+        print()
 
     def like_posts_and_follower(self, user: str):
 
@@ -238,30 +242,88 @@ class InstaBot():
         print(f'Прочитано {len(followers_url)} ссылок на профили подписчиков пользователя {user}')
 
         subscribe_list = []
-        for i, follower_url in enumerate(followers_url[0:15]):
+        for i, follower_url in enumerate(followers_url[22:25]):
             try:
                 follower = follower_url.split('/')[-2]
                 self.driver.get(follower_url)
                 sleep(randrange(4, 6))
                 print(f'Итерация # {i + 1}. Пользователь {follower}... ', end='')
-                self.driver.find_element(*MyProfile.edit_btn)
 
-                if not self.selector_exist(*PostInsta.wrong_userpage):
-                    if self.selector_exist(*UserInsta.user_subscribe):
+                if not self.selector_exist(PostInsta.wrong_userpage):
+                    self.driver.find_element(*MyProfile.edit_btn)
+                    # Подписка на пользователя
+                    if self.selector_exist(UserInsta.user_subscribe) and not self.selector_exist(
+                            UserInsta.user_send_message):
                         self.driver.find_element(*UserInsta.user_subscribe).click()
                         subscribe_list.append(follower_url)
                         print('Успешно подписались!')
-                    elif self.selector_exist(*UserInsta.user_request_subscribe):
-                        self.driver.find_element(*UserInsta.user_request_subscribe).click()
-                        subscribe_list.append(follower_url)
-                        print('Запросили подписку.')
-                    elif self.selector_exist(*UserInsta.user_already_subscribe):
-                        print('Уже подписаны.')
 
+                        self.delay_action(80)
 
+                        # Лайк на посты
+                        amount_posts = self.driver.find_element(*UserInsta.user_posts).text.split()
+                        amount_posts = int(''.join(amount_posts))
+                        print(f'  Всего постов у пользователя {follower} - {amount_posts}')
+
+                        hrefs = self.driver.find_elements(By.TAG_NAME, 'a')
+                        posts_url = [item.get_attribute('href') for item in hrefs if
+                                     '/p/' in item.get_attribute('href')]
+                        sleep(randrange(4, 7))
+
+                        # Чтение > 24 постов
+                        # if amount_posts > 24:
+                        #     amount_iter = (amount_posts - 24) // 12
+                        #     for i in range(0, amount_iter):
+                        #         # self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                        #         self.driver.find_element(By.TAG_NAME, 'html').send_keys(Keys.END)
+                        #         sleep(randrange(4, 7))
+                        #         hrefs = self.driver.find_elements(By.TAG_NAME, 'a')
+                        #         posts_url_part = [item.get_attribute('href') for item in hrefs if
+                        #                           '/p/' in item.get_attribute('href')]
+                        #         posts_url += posts_url_part
+
+                        posts_url = list(set(posts_url))
+                        amount_parce_posts = len(posts_url)
+                        if amount_parce_posts < 10:
+                            amount_like_posts = amount_parce_posts
+                        else:
+                            amount_like_posts = 10
+                        print(f'  Постов прочитано: {amount_parce_posts}. Ставим лайки на первые {amount_like_posts}')
+
+                        # print(f'Сохранение в файл {tag}_links.txt')
+                        # with open(f'files\\{tag}_links.txt', 'a') as text_file:
+                        #     for link in posts_url:
+                        #         text_file.write(link + '\n')
+
+                        for i, post_url in enumerate(posts_url[0:amount_like_posts]):
+                            try:
+                                self.driver.get(post_url)
+                                sleep(randrange(4, 6))
+                                if self.selector_exist(UserInsta.user_post_like):
+                                    print(f'    Пост # {i + 1} - ставим лайк')
+                                    self.driver.find_element(*UserInsta.user_post_like).click()
+                                    self.delay_action(40)
+
+                                else:
+                                    print(f'    Пост # {i + 1} - уже есть лайк')
+                            except Exception as ex:
+                                print(f'Вызвано исключение: {ex}')
+                                self.close_browser()
+
+                    elif self.selector_exist(UserInsta.user_request_subscribe):
+                        if self.selector_exist(UserInsta.user_send_message):
+                            print('Уже подписаны.')
+                        else:
+                            status = self.driver.find_element(*UserInsta.user_request_subscribe).text
+                            if status == 'Подписаться':
+                                self.driver.find_element(*UserInsta.user_request_subscribe).click()
+                                subscribe_list.append(follower_url)
+                                print('Запросили подписку.')
+                            elif status == 'Запрос отправлен':
+                                print('Уже была запрошена подписка.')
 
                 else:
-                    print(f'Итерация # {i + 1}. Не удалось прочитать пользователя {follower}')
+                    print(f'Не удалось прочитать пользователя {follower}')
 
             except Exception as ex:
                 print(f'Вызвано исключение: {ex}')
@@ -276,6 +338,7 @@ try:
     # instabot.parce_users_post_by_tag('СовместныеПокупкиХарьков')
     # instabot.parse_follower_users('https://instagram.com/usa_shop_kharkov/')
     # sleep(randrange(4, 6))
+    instabot.like_posts_and_follower('aiherbskidki')
     instabot.goto_profile(kardon_login)
     sleep(randrange(3, 5))
     instabot.exit_profile()
