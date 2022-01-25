@@ -221,17 +221,14 @@ class InstaBot():
         self.driver.find_element(*MyProfile.exit_btn).click()
 
     def delay_action(self, min: int):
-        if min == 40:
-            delay = randrange(40, 60)
-        elif min == 80:
-            delay = randrange(80, 120)
+        delay = randrange(min, min + 20)
 
         while delay:
-            print(f'\rЗадержка {delay} с.', end='')
+            print(f'\rЗадержка {delay-1} с.', end='')
             sleep(1)
             delay -= 1
 
-        print()
+        print('\r ', end='')
 
     def like_posts_and_follower(self, user: str):
 
@@ -242,7 +239,7 @@ class InstaBot():
         print(f'Прочитано {len(followers_url)} ссылок на профили подписчиков пользователя {user}')
 
         subscribe_list = []
-        for i, follower_url in enumerate(followers_url[22:25]):
+        for i, follower_url in enumerate(followers_url[41:51]):
             try:
                 follower = follower_url.split('/')[-2]
                 self.driver.get(follower_url)
@@ -288,24 +285,26 @@ class InstaBot():
                             amount_like_posts = amount_parce_posts
                         else:
                             amount_like_posts = 10
-                        print(f'  Постов прочитано: {amount_parce_posts}. Ставим лайки на первые {amount_like_posts}')
+                        print(f'   Постов прочитано: {amount_parce_posts}. Ставим лайки на первые {amount_like_posts}')
 
                         # print(f'Сохранение в файл {tag}_links.txt')
                         # with open(f'files\\{tag}_links.txt', 'a') as text_file:
                         #     for link in posts_url:
                         #         text_file.write(link + '\n')
 
+                        print('\r ', end='')
+
                         for i, post_url in enumerate(posts_url[0:amount_like_posts]):
                             try:
                                 self.driver.get(post_url)
                                 sleep(randrange(4, 6))
                                 if self.selector_exist(UserInsta.user_post_like):
-                                    print(f'    Пост # {i + 1} - ставим лайк')
+                                    print(f'     Пост # {i + 1} - ставим лайк')
                                     self.driver.find_element(*UserInsta.user_post_like).click()
                                     self.delay_action(40)
 
                                 else:
-                                    print(f'    Пост # {i + 1} - уже есть лайк')
+                                    print(f'   Пост # {i + 1} - уже есть лайк')
                             except Exception as ex:
                                 print(f'Вызвано исключение: {ex}')
                                 self.close_browser()
@@ -338,7 +337,7 @@ try:
     # instabot.parce_users_post_by_tag('СовместныеПокупкиХарьков')
     # instabot.parse_follower_users('https://instagram.com/usa_shop_kharkov/')
     # sleep(randrange(4, 6))
-    instabot.like_posts_and_follower('aiherbskidki')
+    instabot.like_posts_and_follower('dress.ville')
     instabot.goto_profile(kardon_login)
     sleep(randrange(3, 5))
     instabot.exit_profile()
