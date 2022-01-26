@@ -224,7 +224,7 @@ class InstaBot():
         delay = randrange(min, min + 20)
 
         while delay:
-            print(f'\rЗадержка {delay-1} с.', end='')
+            print(f'\rЗадержка {delay - 1} с.', end='')
             sleep(1)
             delay -= 1
 
@@ -239,7 +239,7 @@ class InstaBot():
         print(f'Прочитано {len(followers_url)} ссылок на профили подписчиков пользователя {user}')
 
         subscribe_list = []
-        for i, follower_url in enumerate(followers_url[41:51]):
+        for i, follower_url in enumerate(followers_url[96:101]):
             try:
                 follower = follower_url.split('/')[-2]
                 self.driver.get(follower_url)
@@ -281,11 +281,16 @@ class InstaBot():
 
                         posts_url = list(set(posts_url))
                         amount_parce_posts = len(posts_url)
-                        if amount_parce_posts < 10:
-                            amount_like_posts = amount_parce_posts
+
+                        if amount_parce_posts == 0:
+                            print('   Постов нет. Переходим к следующему пользователю.')
                         else:
-                            amount_like_posts = 10
-                        print(f'   Постов прочитано: {amount_parce_posts}. Ставим лайки на первые {amount_like_posts}')
+                            if amount_parce_posts < 10:
+                                amount_like_posts = amount_parce_posts
+                            else:
+                                amount_like_posts = 10
+                            print(
+                                f'   Постов прочитано: {amount_parce_posts}. Ставим лайки на первые {amount_like_posts}.')
 
                         # print(f'Сохранение в файл {tag}_links.txt')
                         # with open(f'files\\{tag}_links.txt', 'a') as text_file:
