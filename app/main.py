@@ -239,7 +239,7 @@ class InstaBot():
         print(f'Прочитано {len(followers_url)} ссылок на профили подписчиков пользователя {user}')
 
         subscribe_list = []
-        for i, follower_url in enumerate(followers_url[96:101]):
+        for i, follower_url in enumerate(followers_url[21:41]):
             try:
                 follower = follower_url.split('/')[-2]
                 self.driver.get(follower_url)
@@ -283,7 +283,7 @@ class InstaBot():
                         amount_parce_posts = len(posts_url)
 
                         if amount_parce_posts == 0:
-                            print('   Постов нет. Переходим к следующему пользователю.')
+                            print('   Переходим к следующему пользователю.')
                         else:
                             if amount_parce_posts < 10:
                                 amount_like_posts = amount_parce_posts
@@ -342,7 +342,7 @@ try:
     # instabot.parce_users_post_by_tag('СовместныеПокупкиХарьков')
     # instabot.parse_follower_users('https://instagram.com/usa_shop_kharkov/')
     # sleep(randrange(4, 6))
-    instabot.like_posts_and_follower('dress.ville')
+    instabot.like_posts_and_follower('usa_shop_kharkov')
     instabot.goto_profile(kardon_login)
     sleep(randrange(3, 5))
     instabot.exit_profile()
