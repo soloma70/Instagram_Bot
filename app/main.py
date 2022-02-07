@@ -148,7 +148,6 @@ class InstaBot():
 
                 except Exception as ex:
                     print(f'Вызвано исключение: {ex}')
-                    self.close_browser()
 
         users_url = list(set(users_url))
         print(f'Количество уникальных пользователей {len(users_url)}')
@@ -403,7 +402,6 @@ class InstaBot():
 
             except Exception as ex:
                 print(f'Вызвано исключение: {ex}')
-                self.close_browser()
 
     def compare_followers_following_lists(self, user_name: str):
         """Метод сравнения списков подписчиков и подписок, получения списка не подписаных на нас пользователей.
@@ -444,23 +442,23 @@ class InstaBot():
                 unfollowers_url = file.readlines()
             print(f'Прочитано {len(unfollowers_url)} ссылок на профили для отписок.')
 
-        for i, unfollower_url in enumerate(unfollowers_url[5:25]):
+        for i, unfollower_url in enumerate(unfollowers_url[300:400]):
             try:
                 unfollower = unfollower_url.split('/')[-2]
                 self.driver.get(unfollower_url)
                 sleep(randrange(4, 6))
                 print(f'Итерация # {i + 1}. Пользователь {unfollower}... ', end='')
 
-                if (not self.selector_exist(PostInsta.wrong_userpage1)) or (
-                        not self.selector_exist(PostInsta.wrong_userpage)):
+                if not self.selector_exist(PostInsta.wrong_userpage):
                     self.driver.find_element(*MyProfile.edit_btn)
                     # Отписка от пользователя
                     if self.selector_exist(UserInsta.user_send_message):
                         self.driver.find_element(*UserInsta.user_subscribe).click()
+                        sleep(randrange(1, 2))
                         self.driver.find_element(*UserInsta.user_unsubscribe_confirm).click()
                         print('Успешно отписались!')
 
-                        self.delay_action(80)
+                        self.delay_action(90)
 
                     elif self.driver.find_element(*UserInsta.user_subscribe).text == 'Подписаться':
                         print('Уже отписались!')
@@ -470,7 +468,17 @@ class InstaBot():
 
             except Exception as ex:
                 print(f'Вызвано исключение: {ex}')
-                self.close_browser()
+                # self.close_browser()
+
+    def smart_unsubscribe_full(self, user_name: str):
+        # Парсинг подписчиков пользователя
+        self.parse_followers_users(user_name)
+        # Парсинг подписок пользователя
+        self.parse_followings_users(user_name)
+        # Сравнение подписчиков и подписок и получение файла отписок
+        self.compare_followers_following_lists(user_name)
+        # Отписка от тех, кто не подписан на нас
+        self.smart_unsubscribe(user_name)
 
 instabot = InstaBot(kardon_login, kardon_passw)
 try:
@@ -485,13 +493,7 @@ try:
     # sleep(randrange(4, 6))
     # Подписки и лайки на посты подписчиков пользователя
     # instabot.like_posts_and_follower('shopping.usa.brand')
-    # Парсинг подписчиков пользователя
-    # instabot.parse_followers_users(kardon_login)
-    # Парсинг подписок пользователя
-    # instabot.parse_followings_users(kardon_login)
-    # Сравнение подписчиков и подписок и получение файла отписок
-    # instabot.compare_followers_following_lists(kardon_login)
-    #
+    # Отписка от тех, кто не подписан на нас
     instabot.smart_unsubscribe(kardon_login)
     instabot.goto_profile(kardon_login)
     sleep(randrange(3, 5))
