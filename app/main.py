@@ -314,21 +314,34 @@ class InstaBot():
         print(f'Прочитано {len(followers_url)} ссылок на профили подписчиков пользователя {user}')
 
         subscribe_list = []
-        for i, follower_url in enumerate(followers_url[33:41]):
+        for i, follower_url in enumerate(followers_url[133:134]):
             try:
                 follower = follower_url.split('/')[-2]
                 self.driver.get(follower_url)
-                sleep(randrange(4, 6))
+                sleep(randrange(2, 5))
                 print(f'Итерация # {i + 1}. Пользователь {follower}... ', end='')
 
                 if (not self.selector_exist(PostInsta.wrong_userpage1)) or (
                         not self.selector_exist(PostInsta.wrong_userpage)):
                     self.driver.find_element(*MyProfile.edit_btn)
+
                     # Подписка на пользователя
-                    if self.selector_exist(UserInsta.user_subscribe) and not self.selector_exist(
-                            UserInsta.user_send_message):
-                        self.driver.find_element(*UserInsta.user_subscribe).click()
+                    status_selector = self.selector_exist(UserInsta.user_subscribe)
+                    if not status_selector:
+                        user_status_before = self.driver.find_element(*UserInsta.user_subscribe1).text
+                        if user_status_before == 'Подписаться':
+                            self.driver.find_element(*UserInsta.user_subscribe1).click()
+                    else:
+                        user_status_before = self.driver.find_element(*UserInsta.user_subscribe).text
+                        if user_status_before == 'Подписаться':
+                            self.driver.find_element(*UserInsta.user_subscribe).click()
+
+                    sleep(randrange(1, 3))
+                    user_status_after = self.driver.find_element(*UserInsta.user_subscribe).text
+                    if user_status_before != user_status_after:
                         subscribe_list.append(follower_url)
+
+                    if user_status_before == 'Подписаться' and user_status_after == 'Отправить сообщение':
                         print('Успешно подписались!')
 
                         self.delay_action(80)
@@ -341,7 +354,7 @@ class InstaBot():
                         hrefs = self.driver.find_elements(By.TAG_NAME, 'a')
                         posts_url = [item.get_attribute('href') for item in hrefs if
                                      '/p/' in item.get_attribute('href')]
-                        sleep(randrange(4, 7))
+                        sleep(randrange(3, 5))
 
                         # Чтение > 24 постов
                         # if amount_posts > 24:
@@ -368,34 +381,32 @@ class InstaBot():
                             print(
                                 f'   Постов прочитано: {amount_parce_posts}. Ставим лайки на первые {amount_like_posts}.')
 
-                        print('\r ', end='')
+                            print('\r ', end='')
 
-                        for i, post_url in enumerate(posts_url[0:amount_like_posts]):
-                            try:
-                                self.driver.get(post_url)
-                                sleep(randrange(4, 6))
-                                if self.selector_exist(UserInsta.user_post_like):
-                                    print(f'     Пост # {i + 1} - ставим лайк')
-                                    self.driver.find_element(*UserInsta.user_post_like).click()
-                                    self.delay_action(40)
+                            for i, post_url in enumerate(posts_url[0:amount_like_posts]):
+                                try:
+                                    self.driver.get(post_url)
+                                    sleep(randrange(4, 6))
+                                    if self.selector_exist(UserInsta.user_post_like):
+                                        print(f'     Пост # {i + 1} - ставим лайк')
+                                        self.driver.find_element(*UserInsta.user_post_like).click()
+                                        self.delay_action(40)
+                                    else:
+                                        print(f'   Пост # {i + 1} - уже есть лайк')
+                                except Exception as ex:
+                                    print(f'Вызвано исключение: {ex}')
 
-                                else:
-                                    print(f'   Пост # {i + 1} - уже есть лайк')
-                            except Exception as ex:
-                                print(f'Вызвано исключение: {ex}')
-                                self.close_browser()
+                    elif user_status_before == 'Подписаться' and user_status_after == 'Запрос отправлен':
+                        print('Запросили подписку.')
+                        sleep(randrange(1, 3))
 
-                    elif self.selector_exist(UserInsta.user_request_subscribe):
-                        if self.selector_exist(UserInsta.user_send_message):
-                            print('Уже подписаны.')
-                        else:
-                            status = self.driver.find_element(*UserInsta.user_request_subscribe).text
-                            if status == 'Подписаться':
-                                self.driver.find_element(*UserInsta.user_request_subscribe).click()
-                                subscribe_list.append(follower_url)
-                                print('Запросили подписку.')
-                            elif status == 'Запрос отправлен':
-                                print('Уже была запрошена подписка.')
+                    elif user_status_before == 'Отправить сообщение':
+                        print('Уже подписаны.')
+                        sleep(randrange(1, 3))
+
+                    elif user_status_before == 'Запрос отправлен':
+                        print('Уже была запрошена подписка.')
+                        sleep(randrange(1, 3))
 
                 else:
                     print(f'Не удалось прочитать пользователя {follower}')
@@ -434,6 +445,7 @@ class InstaBot():
         else:
             print(f'Отсутствует файл {user_name}_followers.txt или {user_name}_followings.txt')
 
+    # Modify method -> user_unsubscribe
     def smart_unsubscribe(self, user_name: str):
 
         print()
@@ -442,7 +454,7 @@ class InstaBot():
                 unfollowers_url = file.readlines()
             print(f'Прочитано {len(unfollowers_url)} ссылок на профили для отписок.')
 
-        for i, unfollower_url in enumerate(unfollowers_url[300:400]):
+        for i, unfollower_url in enumerate(unfollowers_url[500:535]):
             try:
                 unfollower = unfollower_url.split('/')[-2]
                 self.driver.get(unfollower_url)
@@ -480,6 +492,7 @@ class InstaBot():
         # Отписка от тех, кто не подписан на нас
         self.smart_unsubscribe(user_name)
 
+
 instabot = InstaBot(kardon_login, kardon_passw)
 try:
     instabot.auth()
@@ -492,9 +505,9 @@ try:
     # instabot.parse_follower_users('usa_shop_kharkov')
     # sleep(randrange(4, 6))
     # Подписки и лайки на посты подписчиков пользователя
-    # instabot.like_posts_and_follower('shopping.usa.brand')
+    instabot.like_posts_and_follower('shopping.usa.brand')
     # Отписка от тех, кто не подписан на нас
-    instabot.smart_unsubscribe(kardon_login)
+    # instabot.smart_unsubscribe(kardon_login)
     instabot.goto_profile(kardon_login)
     sleep(randrange(3, 5))
     #

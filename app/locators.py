@@ -32,16 +32,18 @@ class PostInsta:
 
 class UserInsta:
     user_name = (By.CSS_SELECTOR, 'div > h2')
+    user_subscribe1= (
+        By.XPATH, '//*[@id="react-root"]/section/main/div/header/section/div[2]/div/div/div/span/span[1]/button/div')
     user_subscribe = (
-        By.XPATH, '//*[@id="react-root"]/section/main/div/header/section/div[2]/div/div/div/span/span[1]/button')
-    user_send_message = (By.XPATH, '//*[@id="react-root"]/section/main/div/header/section/div[2]/div/div/button/div')
-    user_request_subscribe = (By.XPATH, '//*[@id="react-root"]/section/main/div/header/section/div[2]/div/div/button')
+        By.XPATH, '//*[@id="react-root"]/section/main/div/header/section/div[2]/div/div[1]/button/div')
 
+    user_unsubscribe = (
+        By.XPATH, '//*[@id="react-root"]/section/main/div/header/section/div[2]/div/div[2]/div/span/span[1]/button')
     user_unsubscribe_confirm = (By.XPATH, '/html/body/div[6]/div/div/div/div[3]/button[1]')
     user_unsubscribe_cancel = (By.XPATH, '/html/body/div[6]/div/div/div/div[3]/button[2]')
 
-    user_posts = (By.XPATH, '//*[@id="react-root"]/section/main/div/ul/li[1]/span/span')
-    user_follow = (By.CSS_SELECTOR, 'ul > li > a > span')  # 2
+    user_posts = (By.XPATH, '//*[@id="react-root"]/section/main/div/ul/li[1]/div/span')
+    user_follow = (By.CSS_SELECTOR, 'ul > li > a > div > span')  # 2
     followers = (By.CSS_SELECTOR, 'li > div > div > div > div > span > a')
     followers_ul = (By.CSS_SELECTOR, 'body > div.RnEpo.Yx5HN > div > div > div > div.isgrP')
     followers_close = (
